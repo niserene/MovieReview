@@ -22,7 +22,7 @@ class MovieViewHolder(itemView: View, onMovieListener: OnMovieListener) : Recycl
             movie_category.text = item.overview
             movie_lang.text = item.original_language.toString()
             movie_category.text = item.release_date
-            movie_rating_bar.rating = (item.vote_average?.div(2))?.toFloat() ?:1f
+            movie_rating_bar.rating = (item.vote_average?.div(2))?.toFloat() ?:4.5f
         }
         Glide.with(itemView.context)
                 .load(Credentials.IMG_URL + item.poster_path)

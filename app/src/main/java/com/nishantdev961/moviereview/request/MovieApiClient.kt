@@ -79,6 +79,7 @@ class MovieApiClient {
                         mMovies.postValue(list)
                     }
                     else{
+                        Log.d("TAG", "Yahan kaise aaya mein")
                         var currentMovies: ArrayList<MovieModel> = ArrayList<MovieModel>(mMovies.value)
                         currentMovies.addAll(list)
                         mMovies.postValue(currentMovies)
@@ -87,7 +88,6 @@ class MovieApiClient {
                 else{
                     Log.d("TAG", "Error on calling retrieve movies")
                 }
-
             }
         }
 
@@ -121,6 +121,7 @@ class MovieApiClient {
                     else{
                         var currentMovies: ArrayList<MovieModel> = ArrayList<MovieModel>(mMoviesPop.value)
                         currentMovies.addAll(list)
+                        Log.d("TAG", currentMovies.toString())
                         mMoviesPop.postValue(currentMovies)
                     }
                 }

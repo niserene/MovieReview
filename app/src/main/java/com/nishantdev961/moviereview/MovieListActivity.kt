@@ -60,7 +60,12 @@ class MovieListActivity : AppCompatActivity(), OnMovieListener{
                 return false
             }
         })
-
+        search_view.setOnCloseListener {
+            isPopular = true
+            movieListViewModel.searchMoviePop(1)
+            movieRecyclerAdapter.notifyDataSetChanged()
+            true
+        }
         search_view.setOnSearchClickListener(object: View.OnClickListener{
             override fun onClick(v: View){
                 isPopular = false
@@ -103,11 +108,15 @@ class MovieListActivity : AppCompatActivity(), OnMovieListener{
 
             override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
                 if(!recyclerView.canScrollHorizontally(2)){
-                    movieListViewModel.searchNextPage()
+                    if(isPopular){
+                        movieListViewModel.searchNextPagePop()
+                    }
+                    else{
+                        movieListViewModel.searchNextPage()
+                    }
                 }
             }
         })
-
     }
 
     override fun onMovieClick(position: Int) {

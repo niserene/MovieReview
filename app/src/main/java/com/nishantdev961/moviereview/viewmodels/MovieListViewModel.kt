@@ -29,4 +29,7 @@ class MovieListViewModel: ViewModel(){
     fun searchNextPage(){
         movieRepo.searchNextPage()
     }
+    fun searchNextPagePop(){
+        movieRepo.searchNextPagePop()
+    }
 }

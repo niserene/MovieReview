@@ -13,4 +13,10 @@
         <item name="android:statusBarColor" tools:targetApi="l">?attr/colorPrimaryVariant</item>
         <!-- Customize your theme here. -->
     </style>
+
+    <style name="RatingBar" parent="Theme.MovieReview">
+        <item name="colorControlActivated">@color/pink</item>
+        <item name="colorControlNormal">@android:color/holo_green_light</item>
+    </style>
+
 </resources>

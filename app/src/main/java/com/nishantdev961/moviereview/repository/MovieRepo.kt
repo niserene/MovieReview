@@ -22,7 +22,7 @@ class MovieRepo{
 
     private  var mQuery:String="fast"
     private  var mPageNumber:Int=1
-
+    private var mPageNumberPop = 1
     init{
         movieApiClient = MovieApiClient.getInstance()
     }
@@ -44,6 +44,11 @@ class MovieRepo{
     }
 
     fun searchNextPage(){
-        searchMovieApi(mQuery, mPageNumber+1)
+        mPageNumber+=1
+        searchMovieApi(mQuery, mPageNumber)
+    }
+    fun searchNextPagePop(){
+        mPageNumberPop+=1
+        searchMoviePop(mPageNumberPop)
     }
 }
