@@ -11,8 +11,11 @@ import retrofit2.Response
 
 class MovieApiClient {
 
-    private var mMovies: MutableLiveData<List<MovieModel>> = MutableLiveData()
+    private lateinit var mMovies: MutableLiveData<List<MovieModel>>
     private var retrieveMovies: RetrieveMovies?=null
+    private var retrieveMoviesPop: RetrieveMoviesPop?=null
+
+    private lateinit var mMoviesPop:MutableLiveData<List<MovieModel>>
 
     companion object{
 
@@ -28,10 +31,14 @@ class MovieApiClient {
 
     init{
         mMovies = MutableLiveData()
+        mMoviesPop = MutableLiveData()
     }
 
     fun getMovies(): LiveData<List<MovieModel>>{
         return mMovies
+    }
+    fun getMoviesPop():LiveData<List<MovieModel>>{
+        return mMoviesPop
     }
 
 //    this is the method we will call from classes to get data from web source
@@ -42,6 +49,15 @@ class MovieApiClient {
         }
         retrieveMovies = RetrieveMovies(query, page)
         retrieveMovies!!.runIt()
+    }
+
+    fun searchMoviesPop(page: Int){
+
+        if(retrieveMoviesPop!=null){
+            retrieveMoviesPop = null
+        }
+        retrieveMoviesPop = RetrieveMoviesPop(page)
+        retrieveMoviesPop!!.runIt()
     }
 
     inner class RetrieveMovies(private val query: String, private val page: Int) {
@@ -82,6 +98,45 @@ class MovieApiClient {
                         Credentials.API_KEY,
                         query,
                         page.toString()
+                )
+            }
+        }
+    }
+
+    inner class RetrieveMoviesPop(private var page: Int){
+
+        fun runIt(){
+
+            GlobalScope.launch (Dispatchers.Main){
+
+                val response = async {getMoviesPop()}.await()
+                if(response.isSuccessful){
+
+//                    Log.d("TAG", response.body()?.getMovies().toString())
+                    var list : List<MovieModel> = ArrayList<MovieModel>(response.body()?.getMovies())
+
+                    if(page == 1){
+                        mMoviesPop.postValue(list)
+                    }
+                    else{
+                        var currentMovies: ArrayList<MovieModel> = ArrayList<MovieModel>(mMoviesPop.value)
+                        currentMovies.addAll(list)
+                        mMoviesPop.postValue(currentMovies)
+                    }
+                }
+                else{
+                    Log.d("TAG", "Error on calling retrieve movies")
+                }
+
+            }
+        }
+
+        private suspend fun getMoviesPop():Response<MovieSearchResponse>{
+
+            return withContext(Dispatchers.IO){
+                Service.getMovieApi().getPopular(
+                    Credentials.API_KEY,
+                    page.toString()
                 )
             }
         }

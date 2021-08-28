@@ -8,10 +8,7 @@ import okhttp3.OkHttpClient
 
 class MovieRepo{
 
-    // respositories for the MVVM architechture
-
     companion object{
-
         private var instance: MovieRepo?=null
         private lateinit var movieApiClient:MovieApiClient
 
@@ -23,14 +20,30 @@ class MovieRepo{
         }
     }
 
+    private  var mQuery:String="fast"
+    private  var mPageNumber:Int=1
+
     init{
         movieApiClient = MovieApiClient.getInstance()
     }
 
     fun getMovies(): LiveData<List<MovieModel>> = movieApiClient.getMovies()
 
-    fun searchMovieApi(query: String, page: Int){
+    fun getPop(): LiveData<List<MovieModel>> = movieApiClient.getMoviesPop()
 
-        movieApiClient.searchMoviesApi(query, page)
+    fun searchMovieApi(query: String, page: Int){
+        mQuery = query
+        mPageNumber = page
+        movieApiClient.searchMoviesApi(mQuery, mPageNumber)
+
+    }
+
+    fun searchMoviePop(page:Int){
+        mPageNumber = page
+        movieApiClient.searchMoviesPop(mPageNumber)
+    }
+
+    fun searchNextPage(){
+        searchMovieApi(mQuery, mPageNumber+1)
     }
 }

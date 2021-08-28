@@ -1,110 +1,125 @@
 package com.nishantdev961.moviereview
 
 
+import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
+import android.view.View
+import android.widget.SearchView
+import android.widget.Toast
 import androidx.lifecycle.Observer
-import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
-import androidx.lifecycle.get
-import com.nishantdev961.moviereview.models.MovieModel
-import com.nishantdev961.moviereview.request.Service
-import com.nishantdev961.moviereview.utils.Credentials
-import com.nishantdev961.moviereview.utils.MovieApi
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
+import com.nishantdev961.moviereview.adapters.MovieRecyclerAdapter
+import com.nishantdev961.moviereview.adapters.OnMovieListener
 import com.nishantdev961.moviereview.viewmodels.MovieListViewModel
 import kotlinx.android.synthetic.main.activity_main.*
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 
 
-class MovieListActivity : AppCompatActivity(){
+class MovieListActivity : AppCompatActivity(), OnMovieListener{
 
-    // ViewModel
 
     lateinit var movieListViewModel: MovieListViewModel
+    lateinit var movieRecyclerAdapter: MovieRecyclerAdapter
+
+    var isPopular: Boolean = true
 
     override fun onCreate(savedInstanceState: Bundle?) {
 
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+
+        setSupportActionBar(toolbar)
+
+        setUPSearchView()
+
         movieListViewModel = ViewModelProvider(this).get(MovieListViewModel::class.java)
 
-        btn.setOnClickListener{
+        configRecyclerview()
+        ObserveAnyChange()
+        ObservePopularMovies()
 
-            searchMovieApi("Jack Reacher", 1)
-            ObeserveTheChange()
-        }
+        // Getting the popular movies data
+        movieListViewModel.searchMoviePop(1)
     }
 
-    // Observing for the data change here, by LiveData
+    // Get data from search query and output data
+    private fun setUPSearchView() {
 
-    private fun ObeserveTheChange(){
+        search_view.setOnQueryTextListener(object: SearchView.OnQueryTextListener,
+            androidx.appcompat.widget.SearchView.OnQueryTextListener {
+            override fun onQueryTextSubmit(query: String): Boolean {
+                movieListViewModel.searchMovieApi(
+                    query, 1
+                )
+                return false
+            }
+            override fun onQueryTextChange(query: String?): Boolean {
+                return false
+            }
+        })
 
-        movieListViewModel.getMovies().observe(this, Observer {movieModel->
+        search_view.setOnSearchClickListener(object: View.OnClickListener{
+            override fun onClick(v: View){
+                isPopular = false
+            }
+        })
+    }
+    private fun ObservePopularMovies() {
 
-            if(!movieModel.isNullOrEmpty()){
+        movieListViewModel.getPop().observe(this, Observer{ movieModel ->
 
-                for(i in 0..movieModel.size-1) {
-                    movieModel[i].title?.let { Log.d("TAG", it) }
-                }
+            if (!movieModel.isNullOrEmpty()) {
+                movieRecyclerAdapter.setmMovies(movieModel)
             }
             else{
-                Log.d("TAG", "Ye toh Khaali hai :(")
+                Log.d("TAG", "boss Ye toh Khaali hai :(")
+            }
+        })
+
+    }
+    // Observing for the data change here, by LiveData
+    private fun ObserveAnyChange() {
+
+        movieListViewModel.getMovies().observe(this, Observer { movieModel ->
+
+            if (!movieModel.isNullOrEmpty()) {
+                movieRecyclerAdapter.setmMovies(movieModel)
+            }
+            else{
+                Log.d("TAG", "boss Ye toh Khaali hai :(")
             }
         })
     }
 
-//    Calling method in main activity
-    private fun searchMovieApi(query: String, page: Int){
-        movieListViewModel.searchMovieApi(query, page)
+    // setting up the adapter with the recycler view
+    private fun configRecyclerview(){
+        movieRecyclerAdapter = MovieRecyclerAdapter(this)
+        recyclerView.adapter = movieRecyclerAdapter
+        recyclerView.layoutManager = LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false)
+        recyclerView.addOnScrollListener(object: RecyclerView.OnScrollListener() {
+
+            override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
+                if(!recyclerView.canScrollHorizontally(2)){
+                    movieListViewModel.searchNextPage()
+                }
+            }
+        })
+
     }
 
-//    private fun GetRetrofitResponse(){
-//
-//        var movieApi: MovieApi = Service.getMovieApi()
-//
-//        GlobalScope.launch(Dispatchers.Main) {
-//            val response = withContext(Dispatchers.IO) {
-//                movieApi.searchMovie(
-//                    Credentials.API_KEY, "Tenet", "1"
-//                )
-//            }
-//            if (response.isSuccessful){
-//                val movies = ArrayList<MovieModel>(response.body()?.getMovies())
-//                for(i in 0..movies.size-1){
-//                    movies[i].title?.let { Log.d("Tag", it) }
-//                }
-//            }
-//            else{
-//                Log.d("RESP", "FAILED HO GYA")
-//            }
-//        }
-//    }
+    override fun onMovieClick(position: Int) {
 
+        val intent: Intent = Intent(this, MovieDetails::class.java)
+        intent.putExtra("movie", movieRecyclerAdapter.getSelectedMovie(position))
+        startActivity(intent)
+    }
 
-//    private fun GetRetrofitResponseAccordingToId(){
-//
-//        var movieApi: MovieApi = Service.getMovieApi()
-//        GlobalScope.launch(Dispatchers.Main){
-//
-//            val response = withContext(Dispatchers.IO){
-//                movieApi.getMovie(
-//                    "343611",
-//                    Credentials.API_KEY
-//                )
-//            }
-//
-//            if(response.isSuccessful){
-//                Log.d("TAG", response.body().toString())
-//            }
-//            else{
-//                Log.d("TAG", "FAIL HO GYA")
-//            }
-//        }
-//    }
+    override fun onCategoryClick(category: String) {
+        Log.d("A", "som")
+    }
 
 }
 

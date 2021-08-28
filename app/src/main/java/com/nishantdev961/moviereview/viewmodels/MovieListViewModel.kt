@@ -16,7 +16,17 @@ class MovieListViewModel: ViewModel(){
 
     fun getMovies(): LiveData<List<MovieModel>> = movieRepo.getMovies()
 
+    fun getPop(): LiveData<List<MovieModel>> = movieRepo.getPop()
+
     fun searchMovieApi(query:String, page: Int){
         movieRepo.searchMovieApi(query, page)
+    }
+
+    fun searchMoviePop(page: Int){
+        movieRepo.searchMoviePop(page)
+    }
+
+    fun searchNextPage(){
+        movieRepo.searchNextPage()
     }
 }

@@ -16,6 +16,14 @@ interface MovieApi{
         @Query("page")page: String
     ):Response<MovieSearchResponse>
 
+
+    @GET("3/movie/popular")
+    suspend fun getPopular(
+        @Query("api_key")key:String,
+        @Query("page")page: String
+    ):Response<MovieSearchResponse>
+
+
     @GET("3/movie/{movie_id}")
     suspend fun getMovie(
         @Path("movie_id")movie_id: String,
